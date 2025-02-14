@@ -1,18 +1,23 @@
 # fetch_data.py
 import requests
 from config import API_ENDPOINT, SUBSCRIPTION_KEY, REQUESTOR_REF
+from datetime import datetime
 
 def fetch_timetable():
-    # Build the XML request body
+    # Generate current time in ISO format
+    # You may need to adjust this if your API expects a specific timezone.
+    current_time_iso = datetime.utcnow().isoformat() + "Z"
+    
+    # Build the XML request body dynamically
     xml_request = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Siri xmlns="http://www.siri.org.uk/siri" version="2.1"
       xmlns:xsd="http://www.w3.org/2001/XMLSchema"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ServiceRequest>
-    <RequestTimestamp>2025-02-14T10:00:00Z</RequestTimestamp>
+    <RequestTimestamp>{current_time_iso}</RequestTimestamp>
     <RequestorRef>{REQUESTOR_REF}</RequestorRef>
     <EstimatedTimetableRequest version="1.1">
-      <RequestTimestamp>2025-02-14T10:00:00Z</RequestTimestamp>
+      <RequestTimestamp>{current_time_iso}</RequestTimestamp>
       <PreviewInterval>PT120M</PreviewInterval>
       <OperatorRef>GOA</OperatorRef>
       <Lines>
@@ -33,11 +38,8 @@ def fetch_timetable():
     }
     
     response = requests.post(API_ENDPOINT, data=xml_request.encode('utf-8'), headers=headers)
-    
-    # Raise an exception if the request failed
     response.raise_for_status()
     return response.text
 
 if __name__ == "__main__":
-    # For testing purposes only
     print(fetch_timetable())

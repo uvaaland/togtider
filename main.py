@@ -1,15 +1,18 @@
 # main.py
 from fetch_data import fetch_timetable
 from parse_data import parse_departures
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def format_iso_timestamp(iso_str):
     """
-    Convert an ISO8601 timestamp string to a human-readable time format.
-    Example: "2025-02-14T11:02:00+01:00" -> "11:02"
+    Convert an ISO8601 timestamp string to a human-readable time format
+    adjusted by adding 2 hours. For example:
+      "2025-02-17T11:02:00+01:00" -> "13:02"
     """
     dt = datetime.fromisoformat(iso_str)
-    return dt.strftime("%H:%M")
+    # Add a two-hour offset to correct the reported time
+    dt_corrected = dt + timedelta(hours=2)
+    return dt_corrected.strftime("%H:%M")
 
 def main():
     try:
@@ -27,7 +30,6 @@ def main():
                 aimed = format_iso_timestamp(dep['AimedDepartureTime'])
                 actual = format_iso_timestamp(dep['ActualDepartureTime']) if dep['ActualDepartureTime'] else aimed
                 status = "on schedule" if aimed == actual else "delayed"
-                # Print with destination information
                 print(f"Departure at {aimed} (actual: {actual}) to {dep['Destination']} - {status}")
         else:
             print("No southbound departures found for Jåttåvågen.")

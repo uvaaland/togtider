@@ -2,37 +2,64 @@
 import xml.etree.ElementTree as ET
 
 def parse_departures(xml_response):
-    # Define the namespace mapping (for SIRI namespace)
+    """
+    Parses the XML response and groups departures from Jåttåvågen by direction.
+    A departure is only added if its StopPointRef is one of the two codes for Jåttåvågen.
+    The journey’s DirectionRef is used to determine if the departure is southbound or northbound.
+    """
+    # Define the namespace (the sample uses the default "siri" namespace)
     namespaces = {"siri": "http://www.siri.org.uk/siri"}
-
-    # Parse the XML response string
+    
     root = ET.fromstring(xml_response)
-
-    # List to hold departures from Jåttåvågen
-    jattaavagen_departures = []
-
+    # We'll collect departures in a dictionary keyed by direction.
+    departures = {"southbound": [], "northbound": []}
+    
     # Accept both possible StopPointRef codes for Jåttåvågen
     valid_refs = {"NSR:Quay:609", "NSR:Quay:607"}
-
-    # Find all EstimatedCall elements using XPath
-    for call in root.findall(".//siri:EstimatedCall", namespaces):
-        stop_ref_elem = call.find("siri:StopPointRef", namespaces)
-        if stop_ref_elem is not None and stop_ref_elem.text in valid_refs:
-            aimed_dep = call.find("siri:AimedDepartureTime", namespaces)
-            expected_dep = call.find("siri:ExpectedDepartureTime", namespaces)
-
+    
+    # Iterate over each EstimatedVehicleJourney
+    for journey in root.findall(".//siri:EstimatedVehicleJourney", namespaces):
+        # Get the journey direction from DirectionRef.
+        direction_elem = journey.find("siri:DirectionRef", namespaces)
+        if direction_elem is None:
+            continue
+        direction_value = direction_elem.text.strip() if direction_elem.text else ""
+        # Here we assume that "EGS" indicates a southbound journey,
+        # while any other value is taken to be northbound.
+        if direction_value == "EGS" or direction_value == "NBØ":
+            dep_direction = "southbound"
+        else:
+            dep_direction = "northbound"
+        
+        # Find the RecordedCalls element
+        recorded_calls = journey.find("siri:RecordedCalls", namespaces)
+        if recorded_calls is None:
+            continue
+        
+        # Process each RecordedCall within this journey
+        for call in recorded_calls.findall("siri:RecordedCall", namespaces):
+            stop_ref_elem = call.find("siri:StopPointRef", namespaces)
+            if stop_ref_elem is None or stop_ref_elem.text not in valid_refs:
+                continue
+            
+            aimed_dep_elem = call.find("siri:AimedDepartureTime", namespaces)
+            actual_dep_elem = call.find("siri:ActualDepartureTime", namespaces)
+            
             departure_info = {
                 "StopPointRef": stop_ref_elem.text,
-                "AimedDepartureTime": aimed_dep.text if aimed_dep is not None else None,
-                "ExpectedDepartureTime": expected_dep.text if expected_dep is not None else None,
+                "AimedDepartureTime": aimed_dep_elem.text if aimed_dep_elem is not None else None,
+                "ActualDepartureTime": actual_dep_elem.text if actual_dep_elem is not None else None,
+                "Direction": dep_direction,
             }
-            jattaavagen_departures.append(departure_info)
-
-    return jattaavagen_departures
+            departures[dep_direction].append(departure_info)
+            
+    return departures
 
 if __name__ == "__main__":
     # For testing purposes: parse a sample XML (replace with your actual response)
     sample_xml = """PUT_YOUR_SAMPLE_XML_HERE"""
     departures = parse_departures(sample_xml)
-    for dep in departures:
-        print(dep)
+    for direction, deps in departures.items():
+        print(f"{direction.capitalize()} departures:")
+        for dep in deps:
+            print(dep)

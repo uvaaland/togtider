@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 def format_iso_timestamp(iso_str):
     """
-    Convert an ISO8601 timestamp string to a human-readable time format
+    Convert an ISO8601 timestamp string to a human-readable time format,
     adjusted by adding 2 hours. For example:
       "2025-02-17T11:02:00+01:00" -> "13:02"
     """
@@ -19,9 +19,20 @@ def main():
         xml_response = fetch_timetable()
         departures = parse_departures(xml_response)
         
-        # Sort departures in each group by their AimedDepartureTime
+        # Get the current local time as an offset-aware datetime
+        now = datetime.now().astimezone()
+        
+        # Filter out departures that have already happened.
+        # We compare the corrected aimed departure time with the current time.
         for group in departures.values():
-            group.sort(key=lambda d: datetime.fromisoformat(d["AimedDepartureTime"]))
+            group[:] = [
+                d for d in group 
+                if (datetime.fromisoformat(d["AimedDepartureTime"]) + timedelta(hours=2)) >= now
+            ]
+        
+        # Sort departures in each group by their corrected AimedDepartureTime
+        for group in departures.values():
+            group.sort(key=lambda d: datetime.fromisoformat(d["AimedDepartureTime"]) + timedelta(hours=2))
         
         # Print Southbound departures (assumed to have DirectionRef "EGS")
         if departures["southbound"]:
@@ -32,7 +43,7 @@ def main():
                 status = "on schedule" if aimed == actual else "delayed"
                 print(f"Departure at {aimed} (actual: {actual}) to {dep['Destination']} - {status}")
         else:
-            print("No southbound departures found for Jåttåvågen.")
+            print("No upcoming southbound departures found for Jåttåvågen.")
         
         print()  # Blank line between the groups
         
@@ -45,7 +56,7 @@ def main():
                 status = "on schedule" if aimed == actual else "delayed"
                 print(f"Departure at {aimed} (actual: {actual}) to {dep['Destination']} - {status}")
         else:
-            print("No northbound departures found for Jåttåvågen.")
+            print("No upcoming northbound departures found for Jåttåvågen.")
     
     except Exception as e:
         print(f"An error occurred: {e}")

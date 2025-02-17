@@ -16,15 +16,19 @@ def main():
         xml_response = fetch_timetable()
         departures = parse_departures(xml_response)
         
+        # Sort departures in each group by their AimedDepartureTime
+        for group in departures.values():
+            group.sort(key=lambda d: datetime.fromisoformat(d["AimedDepartureTime"]))
+        
         # Print Southbound departures (assumed to have DirectionRef "EGS")
         if departures["southbound"]:
             print("Southbound Departures:")
             for dep in departures["southbound"]:
                 aimed = format_iso_timestamp(dep['AimedDepartureTime'])
-                # Use ActualDepartureTime if available; otherwise default to aimed
                 actual = format_iso_timestamp(dep['ActualDepartureTime']) if dep['ActualDepartureTime'] else aimed
                 status = "on schedule" if aimed == actual else "delayed"
-                print(f"Departure at {aimed} (actual: {actual}) - {status}")
+                # Print with destination information
+                print(f"Departure at {aimed} (actual: {actual}) to {dep['Destination']} - {status}")
         else:
             print("No southbound departures found for Jåttåvågen.")
         
@@ -37,7 +41,7 @@ def main():
                 aimed = format_iso_timestamp(dep['AimedDepartureTime'])
                 actual = format_iso_timestamp(dep['ActualDepartureTime']) if dep['ActualDepartureTime'] else aimed
                 status = "on schedule" if aimed == actual else "delayed"
-                print(f"Departure at {aimed} (actual: {actual}) - {status}")
+                print(f"Departure at {aimed} (actual: {actual}) to {dep['Destination']} - {status}")
         else:
             print("No northbound departures found for Jåttåvågen.")
     

@@ -1,6 +1,6 @@
 # fetch_data.py
 import requests
-from config import API_ENDPOINT, SUBSCRIPTION_KEY, REQUESTOR_REF
+from .config import API_ENDPOINT, SUBSCRIPTION_KEY, REQUESTOR_REF
 from datetime import datetime
 
 def fetch_timetable():

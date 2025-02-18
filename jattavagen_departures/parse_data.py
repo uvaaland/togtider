@@ -1,4 +1,4 @@
-# parse_data.py
+# jattavagen_departures/parse_data.py
 import xml.etree.ElementTree as ET
 
 def parse_departures(xml_response):

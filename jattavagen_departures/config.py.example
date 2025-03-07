@@ -1,0 +1,11 @@
+# config.py.example
+# Copy to config.py and update with your credentials
+
+# API endpoint URL
+API_ENDPOINT = "https://api.banenor.no/customer-info/siri-et/v2.1/rest"
+
+# Your subscription key (replace with your actual key)
+SUBSCRIPTION_KEY = "your_bane_nor_api_key_here"
+
+# Your RequestorRef (optional but recommended for production use)
+REQUESTOR_REF = "togtider_app"

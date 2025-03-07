@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  togtider:
+    build: .
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+    volumes:
+      # Mount just the config file to allow configuration without rebuilding
+      - ./jattavagen_departures/config.py:/app/jattavagen_departures/config.py
+    environment:
+      - PYTHONUNBUFFERED=1  # Ensures logs are output immediately
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 1m
+      timeout: 10s
+      retries: 3

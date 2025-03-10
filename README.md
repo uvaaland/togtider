@@ -11,7 +11,7 @@ A Python application that fetches and displays train departure information for J
 - Provides departure information via:
   - REST API
   - Python module
-  - MCP tool integration
+  - MCP tool integration for Claude Desktop
 
 ## Requirements
 
@@ -73,14 +73,82 @@ for direction, deps in formatted_departures.items():
         print(f"{dep['aimed']} to {dep['destination']} - {dep['status']}")
 ```
 
-### As an MCP Tool
+### Integration with Claude Desktop (MCP)
 
-```python
-from mcp_tool import run_tool
+The togtider application can be integrated with Claude Desktop as an MCP (Model Context Protocol) tool, allowing Claude to fetch real-time train departure information.
 
-# Get departures
-departures = run_tool()
+#### Setting up MCP Integration on macOS
+
+1. Ensure the repository is cloned to your local machine
+2. Configure your API credentials in `config.py`
+3. Modify your Claude Desktop configuration:
+
+```bash
+# Open the Claude Desktop config file
+nano ~/Library/Application\ Support/Claude/claude_desktop_config.json
 ```
+
+4. Add the togtider MCP configuration to the `mcpServers` section:
+
+```json
+"togtider": {
+  "command": "python",
+  "args": [
+    "-m",
+    "mcp_tool",
+    "/path/to/your/togtider/directory"
+  ]
+}
+```
+
+Replace `/path/to/your/togtider/directory` with the actual path to the repository on your system.
+
+Alternatively, if you're using environment management tools like `uv` or `conda`, configure it like this:
+
+```json
+"togtider": {
+  "command": "uv",
+  "args": [
+    "--directory",
+    "/path/to/your/togtider",
+    "run",
+    "mcp_tool.py"
+  ]
+}
+```
+
+#### Setting up MCP Integration on Windows
+
+1. Ensure the repository is cloned to your local machine
+2. Configure your API credentials in `config.py`
+3. Locate and modify your Claude Desktop configuration file:
+   - Typically found at `%APPDATA%\Claude\claude_desktop_config.json`
+   - You can open this file using Notepad or any text editor
+
+4. Add the togtider MCP configuration to the `mcpServers` section:
+
+```json
+"togtider": {
+  "command": "python",
+  "args": [
+    "-m",
+    "mcp_tool",
+    "C:\\path\\to\\your\\togtider\\directory"
+  ]
+}
+```
+
+Replace `C:\\path\\to\\your\\togtider\\directory` with the actual path to the repository on your system, using double backslashes for directory separators.
+
+#### Using Togtider in Claude Desktop
+
+Once configured, you can ask Claude to fetch train departure information by using prompts like:
+
+- "Show me the upcoming train departures from Jåttåvågen station"
+- "Are there any delayed trains at Jåttåvågen?"
+- "When is the next train to Stavanger from Jåttåvågen?"
+
+Claude will use the togtider tool to fetch and display real-time departure information.
 
 ## API Response Format
 
@@ -109,6 +177,18 @@ The API returns a JSON object with the following structure:
 }
 ```
 
+## Docker Deployment
+
+The project includes a Dockerfile and docker-compose.yml for easy deployment:
+
+```bash
+# Build and start with docker-compose
+docker-compose up -d
+
+# Check logs
+docker-compose logs -f
+```
+
 ## Testing
 
 Run the tests with:
@@ -122,7 +202,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## Acknowledgments
 

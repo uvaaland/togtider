@@ -23,7 +23,7 @@ def fetch_timetable():
     logger.info(f"Fetching timetable at {current_time_iso}")
     
     # Build the XML request body dynamically
-    xml_request = f\"\"\"<?xml version="1.0" encoding="UTF-8"?>
+    xml_request = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Siri xmlns="http://www.siri.org.uk/siri" version="2.1"
       xmlns:xsd="http://www.w3.org/2001/XMLSchema"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -44,7 +44,7 @@ def fetch_timetable():
     </EstimatedTimetableRequest>
   </ServiceRequest>
 </Siri>
-\"\"\"
+"""
 
     headers = {
         "Content-Type": "application/xml",

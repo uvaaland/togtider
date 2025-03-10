@@ -9,16 +9,16 @@ from jattavagen_departures.service import get_upcoming_departures, format_depart
 
 
 # Load environment variables
-load_dotenv()
+#load_dotenv()
 
 # Get Application Insights credentials
-API_ENDPOINT = os.getenv("API_ENDPOINT")
-SUBSCRIPTION_KEY = os.getenv("SUBSCRIPTION_KEY")
-REQUESTOR_REF=os.getenv("REQUESTOR_REF")
+#API_ENDPOINT = os.getenv("API_ENDPOINT")
+#SUBSCRIPTION_KEY = os.getenv("SUBSCRIPTION_KEY")
+#REQUESTOR_REF=os.getenv("REQUESTOR_REF")
 
 # Validate environment variables
-if not API_ENDPOINT or not SUBSCRIPTION_KEY or not REQUESTOR_REF:
-    raise ValueError("API_ENDPOINT, SUBSCRIPTION_KEY and REQUESTOR_REF must be set in .env file")
+#if not API_ENDPOINT or not SUBSCRIPTION_KEY or not REQUESTOR_REF:
+#    raise ValueError("API_ENDPOINT, SUBSCRIPTION_KEY and REQUESTOR_REF must be set in .env file")
 
 # Create an MCP server
 mcp = FastMCP(
